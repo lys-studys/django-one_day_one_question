@@ -1,0 +1,47 @@
+    <div class="p-4 p-md-8 mb-4 text-black rounded bg-light title">
+        <div class="px-0">
+            <h1 class="display-5 fst-italic">题目信息:</h1>
+            <p class="lead my-3">{{ detail2_question_all.content }}</p>
+            <p class="lead mb-0 d-flex justify-content-between mb-2">
+                <span class="text-black fw-bold">标准答案为：<span style="color: #749f83;">{{ detail2_question_all.true_answer
+                        }}</span></span>
+                <button type="button" class="btn btn-outline-info" data-bs-toggle="collapse"
+                    data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"
+                    style="line-height: 0;">解题分析</button>
+            </p>
+        </div>
+        <div class="collapse" id="collapseExample">
+            <div class="card card-body" id="analysis">
+            </div>
+        </div>
+    </div>
+    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative"
+        style="min-height: 600px;">
+        <div class="col-auto d-none d-lg-block px-4 py-4 " style="background: #55595c;width: 400px;">
+            {% if detail2_question_all.choice_option_content %}
+            <ol class="px-0 d-flex flex-column justify-content-around" style="height: 100%;">
+                <li style="font-size:2rem; list-style: none;color: #eceeef;">题项：</li>
+                {% for question in detail2_question_all.choice_option_content %}
+                <li style="font-size:1.5rem; list-style: none;margin-left: 3rem;">
+                    {% if detail2_question_all.true_answer == question.choice_option %}
+                    <a href="#" style="color: #749f83;text-decoration: none;"
+                        onClick="rendQuestion(event)">{{question.choice_option}}.{{question.choice_content}}</a>
+                    {% else %}
+                    <a href="#" style="color: #eceeef;text-decoration: none;"
+                        onClick="rendQuestion(event)">{{question.choice_option}}.{{question.choice_content}}</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+            <p>无选项数据...</p>
+            {% endif %}
+        </div>
+        <div class="col p-4 d-flex flex-column position-static" style="overflow: hidden;">
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-outline-info" onClick="switchView()">切换视图</button>
+            </div>
+            <div id="myChart_circle" class="chart-container"></div>
+            <div id="myChart_tiao" class="chart-container"></div>
+        </div>
+    </div>

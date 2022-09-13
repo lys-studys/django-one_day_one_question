@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+
+<html>
+<head> 
+<meta charset="utf-8"> 
+<title>每日一题</title>
+<style>
+ul.pagination {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+ul.pagination li {display: inline;}
+
+ul.pagination li a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+ 
+<table width=100% border="0">
+<tr>
+<td colspan="2" style="background-color:#000000;">
+<h1 align="left" 
+style="color:white ; font-size:50px">每日一题</h1>
+</td>
+</tr>
+ 
+<tr>
+<td valign="baseline" style="background-color:#505050;width:20%;">
+
+{% if question_updated_list %}
+    <ol>
+    {% for question in question_updated_list %}
+    <li>
+        <a href="" data-q="{{question}}" onClick="rendQuestion_index(event,'{{question}}')">
+        {{ question }}
+        </a>
+        <hr  color="#000000" >
+    </li>
+    {% endfor %}
+    </ol>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
+</td>
+
+<td style="display:flex;height:200px;width:70%;">
+
+{% if latest_question_list %}
+    <ol id="list_ol">
+
+    {% for question in latest_question_list %}
+    <li>
+        <a href="/polls/{{ question.id }}/">{{ question.title }}</a> 
+        {{question.updated_at}}
+        <hr  color="#000000" >
+    </li>
+    {% endfor %}
+    </ol>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
+
+</td>
+</tr>
+ 
+<tr>
+<td colspan="2" style="background-color:#000000;text-align:center;">
+版权 © www.kaikeba.com</td>
+</tr>
+</table>
+<script src="https://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+// var latest_question_list = null;
+<script>
+function rendQuestion_index(e, question){
+            e.preventDefault();
+//            console.log("question");
+//            console.log(question);
+//            latest_question_list = question_updated_content_list[question];
+//    var rep = document.getElementById('list_ol');
+//    var li = document.createDocumentFragment();
+//    if(latest_question_list.length>0){
+//         latest_question_list.forEach(function(item){
+//            console.log(12321312312)
+//            var createLi = document.createElement('li');
+//            createLi.innerText = item.title;
+//            li.appendChild(createLi);
+//        })
+//    }
+//    console.log(li);
+//    rep.replaceChildren(li);
+//        console.log("latest_question_list");
+//        console.log(latest_question_list);
+    console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
+    var question_updated_list = [];
+    var data = {
+        "name": question,
+        "age" : 1,
+    };
+    console.log("121212121212121212121");
+    // 如果页面并没有表单，只是input框，请求也只是发送这些值，那么可以直接获取放到data中
+    //data['name'] = $('#name').val();
+    // 如果页面有表单，那么可以利用jquery的serialize()方法获取表单的全部数据
+    console.log("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+    //data = $('#form1').serialize();
+    console.log("这里就这样");
+    $.ajax({
+        type: 'POST',
+        url: "/polls/",
+        data: data,  //request Header中默认是Content-Type:application/x-www-form-urlencoded
+        dataType: 'json', // 注意：期望服务器返回的数据类型
+        success: function(data) { //这里的data就是json格式的数据
+            question_updated_list = data.name;            
+            console.log("1111111111111111111");
+            console.log(data);
+            var rep = document.getElementById('list_ol');
+            var li = document.createDocumentFragment();
+            //console.log("latest_question_list.length");
+            // console.log(latest_question_list);
+            if(question_updated_list.length>0){
+                question_updated_list[0].forEach(function(item){
+                console.log(12321312312,item.id);
+                var createLi = document.createElement('li');
+                    createLi.innerHTML = "<a href='/polls/" + item.id + "'>"+ item.title +"</a>";
+                
+                li.appendChild(createLi);
+               })
+            }
+             rep.replaceChildren(li);
+             console.log("latest_question_list");
+
+
+        },
+        error: function(xhr, type) {
+
+            console.log("22222222222222222222");
+            console.log("xhr");
+            console.log(xhr);
+            console.log("type");
+            console.log(type);
+        }
+    });
+//    var latest_question_list = [];
+//    for i in question_updated_list: 
+//        for inde in i: 
+//            latest_question_list.push(index);
+//        break;
+
+    
+
+
+
+ }
+</script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,146 @@
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views import generic
+from .models import Choice, Question, Student, Task 
+from pyecharts import options as opts
+from pyecharts.charts import Pie
+from pyecharts.faker import Faker
+from pathlib import Path
+from datetime import date, datetime
+import mysql.connector
+import json
+import pymysql
+from django.forms import model_to_dict
+#import visualization2
+# Create your views here.
+# 数据库部分
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(obj, date):
+            return obj.strftime('%Y-%m-%d')
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+def get_information(sql):
+    mydb = mysql.connector.connect(
+     host="xue.kaikeba.com",       # 数据库主机地址
+     user="lys",    # 数据库用户名
+     passwd="wLQ2uFbMiZEeh7qS",   # 数据库密码
+     database="suanke"
+    )
+    mycursor = mydb.cursor()
+    mycursor.execute(sql)
+    fields = mycursor.description
+    result = mycursor.fetchall()
+    column_list=[]
+    jsondata = {"question"}
+    for i in fields:
+        column_list.append(i[0])
+    for row in result:
+        data = {}
+        for i in range(len(column_list)):
+            data[column_list[i]] = row[i]
+        jsondata.add(json.dumps(data, cls=ComplexEncoder, ensure_ascii=False))
+    #    print(jsondata)
+
+    return jsondata
+
+def get_event():
+    sql = "select * from suanke_choice_questions"
+    return get_information(sql)
+
+def get_event_type():
+    sql = "select * from suanke_choice_question_user_answer_data"
+    return get_information(sql)
+
+class IndexView(generic.ListView):
+    template_name = 'polls/index.html'
+    context_object_name = 'latest_question_list'
+   
+    def get_queryset(self):
+        """Return the last five published questions."""
+
+        sql = "SELECT content from suanke_choice_questions WHERE id < 5"
+
+        #print(get_event()) 
+        print(model_to_dict(get_information(sql)))
+        #return sql;
+        #return get_information(sql);
+        print(list(Question.objects.order_by('-pub_date')[:5]))
+        return Question.objects.order_by('-pub_date')[:5]
+
+
+
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = 'polls/detail.html'
+    def get_queryset(self):
+        """
+        Excludes any questions that aren't published yet.
+        """
+        return Question.objects.filter(pub_date__lte=timezone.now())
+    #def get_queryset(self):
+    #    """
+    #    Excludes any questions that aren't published yet.
+    #    """
+    #    return Question.objects.filter(pub_date__lte=timezone.now())
+
+
+class ResultsView(generic.DetailView):
+    model = Question
+    template_name = 'polls/results.html'
+
+
+
+def vote(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    try:
+       selected_choice = question.choice_set.get(pk=request.POST['choice'])
+       # selected_choice = "SELECT title FROM suanke_choice_questions WHERE id = 5"
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(request, 'polls/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+        })
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+#def results(request, question_id):
+#    question = get_object_or_404(Question, pk=question_id)
+#    return render(request, 'polls/results.html', {'question': question})
+
+
+def student(request):
+    #question_number = model.Student.objects.get(pk=1)
+    question_number = 1
+    return render(request, 'polls/sector.html', {'question_number': question_number})
+
+def pyecharts(request):
+    choose = ["用户量","答对人数","其他人数"]
+    values = [visualization2.x1,visualization2.x2,visualization2.x3]
+    c = (
+        Pie()
+        .add(
+            "",
+            [list(z) for z in zip(choose,values)],
+            center=["35%", "50%"],
+        )
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="Pie-调整位置"),
+            legend_opts=opts.LegendOpts(pos_left="15%"),
+        )
+        .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c} ({d}%)"))
+        .render("polls/sector.html")
+)
+   # question_number = 1
+    #return render(request, 'polls/sector.html', {'question_number':question_number})
